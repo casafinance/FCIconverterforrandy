@@ -24,7 +24,6 @@
       background: var(--bg);
       color: var(--text);
       -webkit-font-smoothing: antialiased;
-      min-height: 100vh;
     }
     .wrap { max-width: 560px; margin: 60px auto; padding: 0 20px; }
     h1 { color: var(--fci-red); font-size: 26px; margin: 0 0 6px; letter-spacing: -0.01em; }
@@ -47,7 +46,7 @@
       transition: border-color 120ms ease, background 120ms ease;
       cursor: pointer; user-select: none;
     }
-    .drop:hover { border-color: var(--fci-red); background: var(--fci-red-tint); }
+    .drop:hover, .drop.over { border-color: var(--fci-red); background: var(--fci-red-tint); }
     .drop p { margin: 0; color: var(--muted); font-size: 14px; }
     .drop p.main { color: var(--text); font-size: 15px; margin-bottom: 4px; }
     .drop strong { color: var(--fci-red); font-weight: 600; }
@@ -81,31 +80,12 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     footer { margin-top: 18px; font-size: 11px; color: var(--muted); text-align: center; }
-
-    /* Full-page drag overlay */
-    #dragmask {
-      position: fixed; inset: 0; z-index: 9999;
-      background: rgba(139, 26, 43, 0.06);
-      border: 4px dashed var(--fci-red);
-      display: none; align-items: center; justify-content: center;
-      pointer-events: none;
-    }
-    #dragmask.show { display: flex; }
-    #dragmask .pill {
-      background: white; color: var(--fci-red);
-      padding: 14px 22px; border-radius: 999px;
-      font-size: 16px; font-weight: 600;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-      border: 1px solid var(--fci-red);
-    }
   </style>
 </head>
 <body>
-  <div id="dragmask"><div class="pill">Drop the PDF anywhere</div></div>
-
   <div class="wrap">
     <h1>FCI Notification of Deposit &rarr; Excel</h1>
-    <p class="sub">Drop a deposit PDF anywhere on the page. Conversion runs entirely in your browser &mdash; nothing is uploaded to any server.</p>
+    <p class="sub">Drop a deposit PDF below. Conversion runs entirely in your browser &mdash; nothing is uploaded to any server.</p>
 
     <div class="card">
       <div id="loading" class="loading">
@@ -115,7 +95,7 @@
 
       <div id="ready" style="display:none">
         <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose or drop a PDF file">
-          <p class="main">Drop a PDF here or anywhere on the page, or <strong>click to choose</strong></p>
+          <p class="main">Drop a PDF here, or <strong>click to choose</strong></p>
           <p>FCI Lender Services deposit notifications only.</p>
           <input id="file" type="file" accept="application/pdf,.pdf" hidden>
         </div>
@@ -129,7 +109,6 @@
 
     <footer>
       Everything runs locally in your browser via Pyodide. The PDF never leaves your machine.
-      First visit downloads about 13&nbsp;MB of Python runtime; afterward everything is cached for instant reloads.
     </footer>
   </div>
 
@@ -657,22 +636,12 @@ if __name__ == "__main__":
 
   </script>
 
-  <script src="./pyodide/pyodide.js"></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
   <script>
-  // ---------- Service worker registration (Option B) ----------
-  // The SW caches /pyodide/ and /wheels/ aggressively after first fetch.
-  // Reloads after the first successful load are near-instant.
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js")
-      .catch(e => console.warn("Service worker registration failed:", e));
-  }
-
   const $ = id => document.getElementById(id);
-  const loading = $("loading"), ready = $("ready");
-  const loadtext = $("loadtext"), loadbar = $("loadbar");
+  const loading = $("loading"), ready = $("ready"), loadtext = $("loadtext"), loadbar = $("loadbar");
   const drop = $("drop"), input = $("file"), info = $("info");
   const fname = $("fname"), fmeta = $("fmeta"), go = $("go"), status = $("status");
-  const dragmask = $("dragmask");
 
   let pyodide = null;
   let chosen = null;
@@ -697,37 +666,26 @@ if __name__ == "__main__":
 
   async function init() {
     try {
-      setLoad("Loading Python runtime\u2026", 15);
+      setLoad("Loading Python runtime (~10 MB, first visit only)\u2026", 10);
       pyodide = await loadPyodide({
-        indexURL: "./pyodide/"
+        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/"
       });
-
-      setLoad("Loading micropip\u2026", 45);
+      setLoad("Loading packages\u2026", 40);
       await pyodide.loadPackage(["micropip"]);
-
-      // Read the wheel manifest written by setup.py
-      setLoad("Installing parser dependencies\u2026", 65);
-      const manifest = await fetch("./wheels/manifest.json").then(r => r.json());
-      const wheelUrls = manifest.wheels.map(w => "./wheels/" + w);
-      // Pass the URL list to Python and install via micropip
-      window.__wheelUrls = wheelUrls;
+      setLoad("Installing pdfminer.six + openpyxl\u2026", 65);
       await pyodide.runPythonAsync(`
 import micropip
-import js
-urls = list(js.window.__wheelUrls)
-await micropip.install(urls)
+await micropip.install(['pdfminer.six', 'openpyxl'])
 `);
-
       setLoad("Loading parser\u2026", 90);
       pyodide.runPython(document.getElementById("pycode").textContent);
-
       setLoad("Ready", 100);
-      await new Promise(r => setTimeout(r, 200));
+      // Small delay so the user sees the full bar before it disappears
+      await new Promise(r => setTimeout(r, 250));
       loading.style.display = "none";
       ready.style.display = "";
     } catch (e) {
-      loadtext.innerHTML = "Failed to load: " + (e.message || e) +
-        "<br><br>If this is your first visit and you have no internet, the runtime can\u2019t download. Otherwise try a hard refresh.";
+      loadtext.textContent = "Failed to load: " + e.message;
       console.error(e);
     }
   }
@@ -742,48 +700,24 @@ await micropip.install(urls)
     fname.textContent = file.name;
     fmeta.textContent = " \u00b7 " + fmtBytes(file.size);
     info.classList.add("show");
-    go.disabled = !pyodide;
-    setStatus(pyodide ? "Ready to convert." : "Still loading Python runtime\u2026");
+    go.disabled = false;
+    setStatus("Ready to convert.");
   }
 
-  // ---------- Drag and drop ANYWHERE on the page ----------
-  // We use a counter because dragenter/dragleave fire for every child element
-  // crossed; tracking depth lets us know when the cursor truly leaves the window.
-  let dragDepth = 0;
-  function showDragMask() { dragmask.classList.add("show"); }
-  function hideDragMask() { dragmask.classList.remove("show"); }
-
-  window.addEventListener("dragenter", e => {
-    if (!e.dataTransfer || ![...e.dataTransfer.types].includes("Files")) return;
-    e.preventDefault();
-    dragDepth++;
-    if (dragDepth === 1) showDragMask();
-  });
-  window.addEventListener("dragover", e => {
-    if (!e.dataTransfer || ![...e.dataTransfer.types].includes("Files")) return;
-    e.preventDefault();
-  });
-  window.addEventListener("dragleave", e => {
-    if (!e.dataTransfer) return;
-    dragDepth = Math.max(0, dragDepth - 1);
-    if (dragDepth === 0) hideDragMask();
-  });
-  window.addEventListener("drop", e => {
-    e.preventDefault();
-    dragDepth = 0;
-    hideDragMask();
-    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-    if (f) pickFile(f);
-  });
-
-  // Click-to-choose still works on the visible drop zone
   drop.addEventListener("click", () => input.click());
   drop.addEventListener("keydown", e => {
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); }
   });
   input.addEventListener("change", e => pickFile(e.target.files[0]));
+  ["dragenter","dragover"].forEach(ev =>
+    drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave","drop"].forEach(ev =>
+    drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", e => {
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) pickFile(f);
+  });
 
-  // ---------- Convert ----------
   go.addEventListener("click", async () => {
     if (!chosen || !pyodide) return;
     go.disabled = true;
@@ -791,7 +725,10 @@ await micropip.install(urls)
     try {
       const buf = await chosen.arrayBuffer();
       const bytes = new Uint8Array(buf);
+      // Use pyodide's in-memory filesystem to pass bytes reliably across
+      // Pyodide versions (buffer-protocol bridging has changed between them)
       pyodide.FS.writeFile("/tmp/in.pdf", bytes);
+      // Yield to the browser so the spinner can paint before parse blocks
       await new Promise(r => setTimeout(r, 20));
       pyodide.runPython(`
 with open('/tmp/in.pdf', 'rb') as f:
