@@ -624,14 +624,15 @@ def convert_bytes(pdf_bytes):
     return write_excel_bytes(summary, rows)
 
 
-# CLI smoke test
+# CLI smoke test (no-op when sys.argv has no file args, e.g. in Pyodide)
 if __name__ == "__main__":
     import sys
-    with open(sys.argv[1], "rb") as f:
-        out = convert_bytes(f.read())
-    with open(sys.argv[2], "wb") as f:
-        f.write(out)
-    print(f"Wrote {len(out)} bytes to {sys.argv[2]}")
+    if len(sys.argv) >= 3:
+        with open(sys.argv[1], "rb") as f:
+            out = convert_bytes(f.read())
+        with open(sys.argv[2], "wb") as f:
+            f.write(out)
+        print(f"Wrote {len(out)} bytes to {sys.argv[2]}")
 
   </script>
 
