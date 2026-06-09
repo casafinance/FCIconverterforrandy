@@ -25,238 +25,736 @@
       color: var(--text);
       -webkit-font-smoothing: antialiased;
     }
-    .wrap {
-      max-width: 560px;
-      margin: 60px auto;
-      padding: 0 20px;
+    .wrap { max-width: 560px; margin: 60px auto; padding: 0 20px; }
+    h1 { color: var(--fci-red); font-size: 26px; margin: 0 0 6px; letter-spacing: -0.01em; }
+    .sub { color: var(--muted); font-size: 14px; margin: 0 0 28px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 22px; }
+    .loading {
+      text-align: center; color: var(--muted); font-size: 14px; padding: 30px 10px;
     }
-    h1 {
-      color: var(--fci-red);
-      font-size: 26px;
-      margin: 0 0 6px;
-      letter-spacing: -0.01em;
+    .loading .bar {
+      margin-top: 12px; height: 4px; background: var(--border); border-radius: 2px;
+      overflow: hidden;
     }
-    .sub {
-      color: var(--muted);
-      font-size: 14px;
-      margin: 0 0 28px;
-    }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 22px;
+    .loading .bar > div {
+      height: 100%; width: 0%; background: var(--fci-red);
+      transition: width 200ms ease;
     }
     .drop {
-      border: 2px dashed var(--border);
-      border-radius: 8px;
-      padding: 40px 20px;
-      text-align: center;
+      border: 2px dashed var(--border); border-radius: 8px;
+      padding: 40px 20px; text-align: center;
       transition: border-color 120ms ease, background 120ms ease;
-      cursor: pointer;
-      user-select: none;
+      cursor: pointer; user-select: none;
     }
-    .drop:hover, .drop.over {
-      border-color: var(--fci-red);
-      background: var(--fci-red-tint);
-    }
+    .drop:hover, .drop.over { border-color: var(--fci-red); background: var(--fci-red-tint); }
     .drop p { margin: 0; color: var(--muted); font-size: 14px; }
     .drop p.main { color: var(--text); font-size: 15px; margin-bottom: 4px; }
     .drop strong { color: var(--fci-red); font-weight: 600; }
     .file {
-      margin-top: 14px;
-      padding: 10px 12px;
-      background: var(--bg);
-      border-radius: 6px;
-      font-size: 13px;
-      color: var(--text);
-      display: none;
-      word-break: break-all;
+      margin-top: 14px; padding: 10px 12px; background: var(--bg);
+      border-radius: 6px; font-size: 13px; display: none; word-break: break-all;
     }
     .file.show { display: block; }
     .file .name { font-weight: 600; }
     .file .meta { color: var(--muted); margin-left: 8px; }
     button {
-      width: 100%;
-      margin-top: 16px;
-      padding: 13px 16px;
-      font-size: 15px;
-      font-weight: 600;
-      color: white;
-      background: var(--fci-red);
-      border: 0;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 120ms ease;
+      width: 100%; margin-top: 16px; padding: 13px 16px;
+      font-size: 15px; font-weight: 600; color: white;
+      background: var(--fci-red); border: 0; border-radius: 8px;
+      cursor: pointer; transition: background 120ms ease;
       font-family: inherit;
     }
     button:hover:not(:disabled) { background: var(--fci-red-dark); }
-    button:disabled {
-      background: #E0E0E0;
-      color: #999999;
-      cursor: not-allowed;
-    }
+    button:disabled { background: #E0E0E0; color: #999; cursor: not-allowed; }
     .status {
-      margin-top: 14px;
-      min-height: 20px;
-      font-size: 13px;
-      text-align: center;
-      color: var(--muted);
+      margin-top: 14px; min-height: 20px; font-size: 13px;
+      text-align: center; color: var(--muted);
     }
     .status.ok  { color: var(--ok); }
     .status.err { color: var(--err); }
     .spin {
-      display: inline-block;
-      width: 12px; height: 12px;
-      border: 2px solid var(--border);
-      border-top-color: var(--fci-red);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      vertical-align: -2px;
-      margin-right: 6px;
+      display: inline-block; width: 12px; height: 12px;
+      border: 2px solid var(--border); border-top-color: var(--fci-red);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+      vertical-align: -2px; margin-right: 6px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    footer {
-      margin-top: 18px;
-      font-size: 11px;
-      color: var(--muted);
-      text-align: center;
-    }
-    footer a { color: var(--muted); }
+    footer { margin-top: 18px; font-size: 11px; color: var(--muted); text-align: center; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>FCI Notification of Deposit → Excel</h1>
-    <p class="sub">Drop a deposit PDF here. You'll get a formatted Excel workbook back, with per-account subtotals and a grand total.</p>
+    <h1>FCI Notification of Deposit &rarr; Excel</h1>
+    <p class="sub">Drop a deposit PDF below. Conversion runs entirely in your browser &mdash; nothing is uploaded to any server.</p>
 
     <div class="card">
-      <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose or drop a PDF file">
-        <p class="main">Drop a PDF here, or <strong>click to choose</strong></p>
-        <p>FCI Lender Services deposit notifications only. Max 4 MB.</p>
-        <input id="file" type="file" accept="application/pdf,.pdf" hidden>
+      <div id="loading" class="loading">
+        <span class="spin"></span><span id="loadtext">Loading Python runtime&hellip;</span>
+        <div class="bar"><div id="loadbar"></div></div>
       </div>
 
-      <div id="info" class="file">
-        <span class="name" id="fname"></span>
-        <span class="meta" id="fmeta"></span>
+      <div id="ready" style="display:none">
+        <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose or drop a PDF file">
+          <p class="main">Drop a PDF here, or <strong>click to choose</strong></p>
+          <p>FCI Lender Services deposit notifications only.</p>
+          <input id="file" type="file" accept="application/pdf,.pdf" hidden>
+        </div>
+        <div id="info" class="file">
+          <span class="name" id="fname"></span><span class="meta" id="fmeta"></span>
+        </div>
+        <button id="go" disabled>Convert to Excel</button>
+        <div id="status" class="status">Ready.</div>
       </div>
-
-      <button id="go" disabled>Convert to Excel</button>
-
-      <div id="status" class="status">Ready.</div>
     </div>
 
     <footer>
-      Files are processed on the server and discarded immediately after conversion. Nothing is stored or logged.
+      Everything runs locally in your browser via Pyodide. The PDF never leaves your machine.
     </footer>
   </div>
 
+  <script id="pycode" type="text/python">
+"""
+deposit_to_excel_browser.py
+
+Same parser as deposit_to_excel.py but uses pdfminer.six directly instead of
+pdfplumber, so it runs in Pyodide (no native dependencies).
+
+The only difference from the desktop version is the word-extraction step.
+All the column-anchor logic, summary parsing, row grouping, and Excel writing
+are byte-for-byte identical.
+"""
+import io
+import re
+from collections import OrderedDict, defaultdict
+from datetime import datetime
+
+from pdfminer.high_level import extract_pages
+from pdfminer.layout import LTChar, LTPage, LTTextContainer, LTTextLine
+
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.utils import get_column_letter
+from openpyxl.formatting.rule import CellIsRule
+
+
+# ---------------------------------------------------------------------------
+# Column layout — identical to desktop version
+# ---------------------------------------------------------------------------
+COLUMNS = [
+    ("account_no",       "Account No.",                    "text",  "left",    0,    85),
+    ("last_name",        "Last Name",                      "text",  "left",   85,   159),
+    ("property_address", "Property Address / City, State", "text",  "left",  159,   285),
+    ("due_date",         "Payment Due Date",               "date",  "left",  285,   335),
+    ("received_date",    "Payment Received",               "date",  "left",  335,   395),
+    ("days_late",        "Days Late",                      "int",   "left",  395,   425),
+    ("principal_bal",    "Principal Balance",              "money", "right", 425,   522),
+    ("principal_pymt",   "Principal Pymt",                 "money", "right", 522,   563),
+    ("interest_pymt",    "Interest Pymt",                  "money", "right", 563,   608),
+    ("escrow_repymt",    "Escrow Adv Repymt",              "money", "right", 608,   652),
+    ("service_fee",      "Service Fee",                    "money", "right", 652,   698),
+    ("other_pymts",      "Other Pymts",                    "money", "right", 698,   746),
+    ("amount_deposited", "Amount Deposited",               "money", "right", 746,  9999),
+]
+
+ACCOUNT_NO_RE = re.compile(r"^\d{9,}$")
+MONEY_RE      = re.compile(r"^-?\$[\d,]+\.\d{2}$")
+DATE_RE       = re.compile(r"^\d{2}/\d{2}/\d{4}$")
+INT_RE        = re.compile(r"^-?\d+$")
+
+Y_LINE_TOLERANCE = 3
+
+
+# ---------------------------------------------------------------------------
+# Value helpers
+# ---------------------------------------------------------------------------
+def money_to_float(s):
+    if s is None or s == "":
+        return None
+    neg = s.startswith("-")
+    s = s.lstrip("-").lstrip("$").replace(",", "")
+    try:
+        v = float(s)
+        return -v if neg else v
+    except ValueError:
+        return None
+
+
+def _parse_date(s):
+    if not s:
+        return None
+    try:
+        return datetime.strptime(s.strip(), "%m/%d/%Y").date()
+    except (ValueError, TypeError):
+        return None
+
+
+def _to_int_or_none(s):
+    if not s:
+        return None
+    s = s.strip()
+    if INT_RE.match(s):
+        try:
+            return int(s)
+        except ValueError:
+            return None
+    return None
+
+
+def _organize_by_account(rows, data_start):
+    grouped = OrderedDict()
+    for r in rows:
+        key = r.get("account_no", "")
+        grouped.setdefault(key, []).append(r)
+    ordered, spans, cursor = [], [], data_start
+    for acct, group in grouped.items():
+        first = cursor
+        last = cursor + len(group) - 1
+        spans.append((acct, first, last))
+        ordered.extend(group)
+        cursor = last + 1
+    return ordered, spans
+
+
+# ---------------------------------------------------------------------------
+# Word extraction — the Pyodide-friendly replacement for pdfplumber
+# ---------------------------------------------------------------------------
+def _chars_to_words(text_line, page_h):
+    """Convert an LTTextLine into a list of word dicts with x0/x1/top/text.
+
+    Word boundaries are detected two ways:
+      1. Whitespace characters → flush current word.
+      2. Horizontal gap between adjacent chars larger than ~30% of the
+         average char width → flush current word. This catches PDFs
+         where word breaks are encoded by positioning rather than spaces.
+    """
+    chars = [c for c in text_line if isinstance(c, LTChar)]
+    if not chars:
+        return []
+    chars.sort(key=lambda c: c.x0)
+    avg_w = sum(c.x1 - c.x0 for c in chars) / len(chars)
+    gap_thresh = max(avg_w * 0.3, 1.0)
+
+    words = []
+    current = []
+    prev_x1 = None
+    for c in chars:
+        text = c.get_text()
+        if text.isspace():
+            if current:
+                words.append(_finalize_word(current, page_h))
+                current = []
+            prev_x1 = None
+            continue
+        if prev_x1 is not None and (c.x0 - prev_x1) > gap_thresh:
+            if current:
+                words.append(_finalize_word(current, page_h))
+                current = []
+        current.append(c)
+        prev_x1 = c.x1
+    if current:
+        words.append(_finalize_word(current, page_h))
+    return words
+
+
+def _finalize_word(chars, page_h):
+    return {
+        "text": "".join(c.get_text() for c in chars),
+        "x0":   min(c.x0 for c in chars),
+        "x1":   max(c.x1 for c in chars),
+        # pdfminer's Y axis is bottom-up; pdfplumber's `top` is top-down.
+        "top":  page_h - max(c.y1 for c in chars),
+    }
+
+
+def _extract_pages_words(pdf_bytes):
+    """Return a list of pages, each a list of word dicts (mimicking pdfplumber)."""
+    pages = []
+    for layout in extract_pages(io.BytesIO(pdf_bytes)):
+        page_h = layout.height
+        words = []
+        for el in layout:
+            if isinstance(el, LTTextContainer):
+                for line in el:
+                    if isinstance(line, LTTextLine):
+                        words.extend(_chars_to_words(line, page_h))
+        pages.append(words)
+    return pages
+
+
+# ---------------------------------------------------------------------------
+# Line clustering + column assignment (same logic as desktop)
+# ---------------------------------------------------------------------------
+def cluster_lines(words, tol=Y_LINE_TOLERANCE):
+    if not words:
+        return []
+    ws = sorted(words, key=lambda w: (w["top"], w["x0"]))
+    lines, current, current_y = [], [ws[0]], ws[0]["top"]
+    for w in ws[1:]:
+        if abs(w["top"] - current_y) <= tol:
+            current.append(w)
+            current_y = (current_y * (len(current) - 1) + w["top"]) / len(current)
+        else:
+            lines.append((current_y, sorted(current, key=lambda x: x["x0"])))
+            current, current_y = [w], w["top"]
+    lines.append((current_y, sorted(current, key=lambda x: x["x0"])))
+    return lines
+
+
+def assign_columns(line_words):
+    buckets = defaultdict(list)
+    for w in line_words:
+        for key, _hdr, _kind, anchor, xmin, xmax in COLUMNS:
+            x = w["x1"] if anchor == "right" else w["x0"]
+            if xmin <= x < xmax:
+                buckets[key].append(w["text"])
+                break
+    return buckets
+
+
+def join_words(words_list):
+    return " ".join(words_list).strip()
+
+
+# ---------------------------------------------------------------------------
+# Summary block parser
+# ---------------------------------------------------------------------------
+def parse_summary(page_words):
+    lines = cluster_lines(page_words)
+    summary = {
+        "investor_id":          "",
+        "investor_name":        "",
+        "date_of_deposit":      "",
+        "reference":            "",
+        "principal":            None,
+        "interest":             None,
+        "escrow_adv_repayment": None,
+        "servicing_fee":        None,
+        "other":                None,
+        "other_tax_free":       None,
+        "total_deposited":      None,
+    }
+    for _y, lw in lines:
+        texts_left  = [w["text"] for w in lw if w["x0"] < 280]
+        texts_right = [w for w in lw if w["x0"] >= 280]
+        left_text   = " ".join(texts_left)
+
+        if left_text.startswith("Investor "):
+            parts = left_text.split()
+            if len(parts) >= 2:
+                summary["investor_id"] = parts[1]
+        elif left_text and not summary["investor_name"] and summary["investor_id"]:
+            if not any(left_text.startswith(s) for s in
+                       ("Account ", "Property ", "City,", "Last ", "Powered ")):
+                summary["investor_name"] = left_text
+
+        if not texts_right:
+            continue
+        label_words = [w["text"] for w in texts_right if 530 <= w["x0"] < 660]
+        value_words = [w["text"] for w in texts_right if w["x0"] >= 660]
+        label = " ".join(label_words).strip()
+        value = " ".join(value_words).strip()
+        if   label == "Date of Deposit":      summary["date_of_deposit"]      = value
+        elif label == "Reference":            summary["reference"]            = value
+        elif label == "Principal":            summary["principal"]            = money_to_float(value)
+        elif label == "Interest":             summary["interest"]             = money_to_float(value)
+        elif label == "Escrow Adv Repayment": summary["escrow_adv_repayment"] = money_to_float(value)
+        elif label == "Servicing Fee":        summary["servicing_fee"]        = money_to_float(value)
+        elif label == "Other":                summary["other"]                = money_to_float(value)
+        elif label == "*Other Tax Free":      summary["other_tax_free"]       = money_to_float(value)
+        elif label == "Total Deposited":      summary["total_deposited"]      = money_to_float(value)
+    return summary
+
+
+# ---------------------------------------------------------------------------
+# Detail row parser
+# ---------------------------------------------------------------------------
+def find_table_top_y(lines):
+    for y, lw in lines:
+        txts = [w["text"] for w in lw]
+        if "Account" in txts and "No." in txts:
+            return y + 5
+    return None
+
+
+def is_footer(words):
+    return " ".join(w["text"] for w in words).startswith("Powered by")
+
+
+def parse_detail_rows(pages_words):
+    rows = []
+    totals_row = None
+
+    for page_words in pages_words:
+        lines = cluster_lines(page_words)
+        table_top = find_table_top_y(lines)
+        if table_top is None:
+            continue
+
+        body_lines = [(y, lw) for y, lw in lines
+                      if y > table_top and not is_footer(lw)]
+
+        current = None
+        for y, lw in body_lines:
+            buckets = assign_columns(lw)
+            acct_cell = " ".join(buckets.get("account_no", [])).strip()
+
+            if ACCOUNT_NO_RE.match(acct_cell):
+                if current is not None:
+                    rows.append(current)
+                current = {key: [] for key, *_ in COLUMNS}
+                for k, vs in buckets.items():
+                    current[k].extend(vs)
+                current["_anchor_y"] = y
+            else:
+                money_cols_present = any(
+                    buckets.get(k) for k in
+                    ("principal_pymt", "interest_pymt", "escrow_repymt",
+                     "service_fee", "other_pymts", "amount_deposited")
+                )
+                has_name_or_addr = bool(buckets.get("last_name") or buckets.get("property_address"))
+                if current is None and money_cols_present and not has_name_or_addr:
+                    totals_row = buckets
+                elif current is not None:
+                    if abs(y - current.get("_anchor_y", y)) <= 18:
+                        for k, vs in buckets.items():
+                            current[k].extend(vs)
+                    else:
+                        if money_cols_present and not has_name_or_addr:
+                            totals_row = buckets
+        if current is not None:
+            rows.append(current)
+
+    cleaned = [{key: join_words(r.get(key, [])) for key, *_ in COLUMNS} for r in rows]
+    totals_clean = None
+    if totals_row:
+        totals_clean = {key: join_words(totals_row.get(key, [])) for key, *_ in COLUMNS}
+    return cleaned, totals_clean
+
+
+# ---------------------------------------------------------------------------
+# Excel writer (identical to desktop version)
+# ---------------------------------------------------------------------------
+THIN  = Side(style="thin",  color="BBBBBB")
+THICK = Side(style="medium", color="000000")
+HEADER_FILL = PatternFill("solid", start_color="8B1A2B")
+HEADER_FONT = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+LABEL_FONT  = Font(name="Calibri", size=11, bold=True)
+TITLE_FONT  = Font(name="Calibri", size=14, bold=True, color="8B1A2B")
+NORMAL_FONT = Font(name="Calibri", size=10)
+TOTAL_FONT  = Font(name="Calibri", size=10, bold=True)
+TOTAL_FILL  = PatternFill("solid", start_color="EDEDED")
+MONEY_FMT   = '_-$* #,##0.00_-;[Red]-$* #,##0.00_-;_-$* #,##0.00_-;_-@_-'
+
+
+def write_excel_bytes(summary, rows):
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Deposit"
+
+    ws["A1"] = "FCI Lender Services – Notification of Deposit"
+    ws["A1"].font = TITLE_FONT
+    ws.merge_cells("A1:N1")
+    ws["A1"].alignment = Alignment(horizontal="left", vertical="center")
+    ws.row_dimensions[1].height = 22
+
+    date_of_deposit_val = _parse_date(summary["date_of_deposit"]) or summary["date_of_deposit"] or None
+    reference_val       = _to_int_or_none(summary["reference"])  or (summary["reference"] or None)
+
+    sm_rows = [
+        ("Investor",              summary["investor_id"]                 or None, "text"),
+        ("Investor Name",         summary["investor_name"]               or None, "text"),
+        ("Date of Deposit",       date_of_deposit_val,                            "date"),
+        ("Reference",             reference_val,                                  "int"),
+        ("Principal",             summary["principal"],                           "money"),
+        ("Interest",              summary["interest"],                            "money"),
+        ("Escrow Adv Repayment",  summary["escrow_adv_repayment"],                "money"),
+        ("Servicing Fee",         summary["servicing_fee"],                       "money"),
+        ("Other",                 summary["other"],                               "money"),
+        ("*Other Tax Free",       summary["other_tax_free"],                      "money"),
+        ("Total Deposited",       summary["total_deposited"],                     "money"),
+    ]
+    start = 3
+    for i, (label, value, kind) in enumerate(sm_rows):
+        r = start + i
+        lc = ws.cell(row=r, column=1, value=label)
+        lc.font = LABEL_FONT
+        lc.alignment = Alignment(horizontal="left")
+        c = ws.cell(row=r, column=3, value=value)
+        c.font = NORMAL_FONT
+        c.alignment = Alignment(horizontal="left")
+        if kind == "money":
+            c.number_format = MONEY_FMT
+        elif kind == "date" and value is not None and not isinstance(value, str):
+            c.number_format = "mm/dd/yyyy"
+        elif kind == "int" and isinstance(value, int):
+            c.number_format = "0"
+        if label == "Total Deposited":
+            lc.font = Font(name="Calibri", size=11, bold=True, color="8B1A2B")
+            c.font  = Font(name="Calibri", size=11, bold=True, color="8B1A2B")
+
+    table_header_row = start + len(sm_rows) + 2
+    SUBTOTAL_COL = len(COLUMNS) + 1
+    SUBTOTAL_LETTER = get_column_letter(SUBTOTAL_COL)
+    AMOUNT_LETTER   = get_column_letter(len(COLUMNS))
+
+    for col_idx, (_key, header, *_rest) in enumerate(COLUMNS, start=1):
+        c = ws.cell(row=table_header_row, column=col_idx, value=header)
+        c.font = HEADER_FONT
+        c.fill = HEADER_FILL
+        c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        c.border = Border(left=THIN, right=THIN, top=THICK, bottom=THICK)
+    sub_hdr = ws.cell(row=table_header_row, column=SUBTOTAL_COL, value="Account Subtotal")
+    sub_hdr.font = HEADER_FONT
+    sub_hdr.fill = HEADER_FILL
+    sub_hdr.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    sub_hdr.border = Border(left=THIN, right=THIN, top=THICK, bottom=THICK)
+    ws.row_dimensions[table_header_row].height = 30
+
+    data_start = table_header_row + 1
+    ordered_rows, group_spans = _organize_by_account(rows, data_start)
+
+    SUBTOTAL_FILL = PatternFill("solid", start_color="F5F0F0")
+    SUBTOTAL_FONT = Font(name="Calibri", size=10, bold=True)
+
+    for i, row in enumerate(ordered_rows):
+        excel_row = data_start + i
+        for col_idx, (key, _hdr, kind, _anchor, _xmin, _xmax) in enumerate(COLUMNS, start=1):
+            raw = row.get(key, "")
+            cell = ws.cell(row=excel_row, column=col_idx)
+            cell.font = NORMAL_FONT
+            cell.border = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
+            if kind == "money":
+                cell.value = money_to_float(raw)
+                cell.number_format = MONEY_FMT
+                cell.alignment = Alignment(horizontal="right")
+            elif kind == "int":
+                if raw and INT_RE.match(raw):
+                    cell.value = int(raw)
+                else:
+                    cell.value = raw or None
+                cell.alignment = Alignment(horizontal="center")
+            elif kind == "date":
+                d = _parse_date(raw)
+                if d is not None:
+                    cell.value = d
+                    cell.number_format = "mm/dd/yyyy"
+                else:
+                    cell.value = raw or None
+                cell.alignment = Alignment(horizontal="center")
+            elif key == "account_no":
+                iv = _to_int_or_none(raw)
+                cell.value = iv if iv is not None else (raw or None)
+                cell.number_format = "0"
+                cell.alignment = Alignment(horizontal="left")
+            else:
+                cell.value = raw or None
+                cell.alignment = Alignment(horizontal="left", wrap_text=True)
+
+        sub_cell = ws.cell(row=excel_row, column=SUBTOTAL_COL)
+        sub_cell.font = NORMAL_FONT
+        sub_cell.border = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
+        sub_cell.number_format = MONEY_FMT
+        sub_cell.alignment = Alignment(horizontal="right")
+
+    data_end = data_start + len(ordered_rows) - 1
+
+    for _acct, first, last in group_spans:
+        cell = ws.cell(row=last, column=SUBTOTAL_COL)
+        cell.value = f"=SUM({AMOUNT_LETTER}{first}:{AMOUNT_LETTER}{last})"
+        cell.font = SUBTOTAL_FONT
+        cell.fill = SUBTOTAL_FILL
+
+    totals_row = data_end + 1
+    ws.cell(row=totals_row, column=1, value="TOTALS").font = TOTAL_FONT
+    ws.cell(row=totals_row, column=1).alignment = Alignment(horizontal="right")
+    ws.cell(row=totals_row, column=1).fill = TOTAL_FILL
+    for col_idx, (_key, _hdr, kind, _anchor, _xmin, _xmax) in enumerate(COLUMNS, start=1):
+        c = ws.cell(row=totals_row, column=col_idx)
+        c.fill = TOTAL_FILL
+        c.font = TOTAL_FONT
+        c.border = Border(top=THICK, bottom=THICK, left=THIN, right=THIN)
+        if kind == "money" and len(ordered_rows) > 0:
+            col_letter = get_column_letter(col_idx)
+            c.value = f"=SUM({col_letter}{data_start}:{col_letter}{data_end})"
+            c.number_format = MONEY_FMT
+            c.alignment = Alignment(horizontal="right")
+    total_sub = ws.cell(row=totals_row, column=SUBTOTAL_COL)
+    total_sub.fill = TOTAL_FILL
+    total_sub.font = TOTAL_FONT
+    total_sub.border = Border(top=THICK, bottom=THICK, left=THIN, right=THIN)
+    if len(ordered_rows) > 0:
+        total_sub.value = f"=SUM({SUBTOTAL_LETTER}{data_start}:{SUBTOTAL_LETTER}{data_end})"
+        total_sub.number_format = MONEY_FMT
+        total_sub.alignment = Alignment(horizontal="right")
+
+    widths = {
+        "account_no":       12, "last_name":        36,
+        "property_address": 26, "due_date":         13,
+        "received_date":    13, "days_late":        7,
+        "principal_bal":    16, "principal_pymt":   14,
+        "interest_pymt":    14, "escrow_repymt":    15,
+        "service_fee":      13, "other_pymts":      13,
+        "amount_deposited": 15,
+    }
+    for col_idx, (key, *_rest) in enumerate(COLUMNS, start=1):
+        ws.column_dimensions[get_column_letter(col_idx)].width = widths.get(key, 12)
+    ws.column_dimensions[SUBTOTAL_LETTER].width = 16
+    if ws.column_dimensions["A"].width < 22:
+        ws.column_dimensions["A"].width = 22
+
+    money_range = f"G{data_start}:{SUBTOTAL_LETTER}{data_end}"
+    if len(ordered_rows) > 0:
+        ws.conditional_formatting.add(
+            money_range,
+            CellIsRule(operator="lessThan", formula=["0"],
+                       font=Font(name="Calibri", size=10, color="C00000"))
+        )
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
+def convert_bytes(pdf_bytes):
+    pages_words = _extract_pages_words(pdf_bytes)
+    if not pages_words:
+        raise ValueError("PDF has no pages.")
+    summary = parse_summary(pages_words[0])
+    rows, _totals = parse_detail_rows(pages_words)
+    return write_excel_bytes(summary, rows)
+
+
+# CLI smoke test
+if __name__ == "__main__":
+    import sys
+    with open(sys.argv[1], "rb") as f:
+        out = convert_bytes(f.read())
+    with open(sys.argv[2], "wb") as f:
+        f.write(out)
+    print(f"Wrote {len(out)} bytes to {sys.argv[2]}")
+
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
   <script>
-    const drop   = document.getElementById('drop');
-    const input  = document.getElementById('file');
-    const info   = document.getElementById('info');
-    const fname  = document.getElementById('fname');
-    const fmeta  = document.getElementById('fmeta');
-    const go     = document.getElementById('go');
-    const status = document.getElementById('status');
+  const $ = id => document.getElementById(id);
+  const loading = $("loading"), ready = $("ready"), loadtext = $("loadtext"), loadbar = $("loadbar");
+  const drop = $("drop"), input = $("file"), info = $("info");
+  const fname = $("fname"), fmeta = $("fmeta"), go = $("go"), status = $("status");
 
-    let chosen = null;
+  let pyodide = null;
+  let chosen = null;
 
-    function fmtBytes(n) {
-      if (n < 1024) return n + ' B';
-      if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
-      return (n / 1024 / 1024).toFixed(2) + ' MB';
+  function setLoad(text, pct) {
+    loadtext.textContent = text;
+    if (pct != null) loadbar.style.width = pct + "%";
+  }
+  function fmtBytes(n) {
+    if (n < 1024) return n + " B";
+    if (n < 1048576) return (n/1024).toFixed(1) + " KB";
+    return (n/1048576).toFixed(2) + " MB";
+  }
+  function setStatus(txt, kind) {
+    status.textContent = txt;
+    status.className = "status" + (kind ? " " + kind : "");
+  }
+  function setStatusBusy(txt) {
+    status.className = "status";
+    status.innerHTML = "<span class=\"spin\"></span>" + txt;
+  }
+
+  async function init() {
+    try {
+      setLoad("Loading Python runtime (~10 MB, first visit only)\u2026", 10);
+      pyodide = await loadPyodide({
+        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/"
+      });
+      setLoad("Loading packages\u2026", 40);
+      await pyodide.loadPackage(["micropip"]);
+      setLoad("Installing pdfminer.six + openpyxl\u2026", 65);
+      await pyodide.runPythonAsync(`
+import micropip
+await micropip.install(['pdfminer.six', 'openpyxl'])
+`);
+      setLoad("Loading parser\u2026", 90);
+      pyodide.runPython(document.getElementById("pycode").textContent);
+      setLoad("Ready", 100);
+      // Small delay so the user sees the full bar before it disappears
+      await new Promise(r => setTimeout(r, 250));
+      loading.style.display = "none";
+      ready.style.display = "";
+    } catch (e) {
+      loadtext.textContent = "Failed to load: " + e.message;
+      console.error(e);
     }
+  }
 
-    function setStatus(text, kind) {
-      status.textContent = text;
-      status.className = 'status' + (kind ? ' ' + kind : '');
+  function pickFile(file) {
+    if (!file) return;
+    if (file.type && file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      setStatus("That file does not look like a PDF.", "err");
+      return;
     }
+    chosen = file;
+    fname.textContent = file.name;
+    fmeta.textContent = " \u00b7 " + fmtBytes(file.size);
+    info.classList.add("show");
+    go.disabled = false;
+    setStatus("Ready to convert.");
+  }
 
-    function setStatusBusy(text) {
-      status.className = 'status';
-      status.innerHTML = '<span class="spin"></span>' + text;
-    }
+  drop.addEventListener("click", () => input.click());
+  drop.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); }
+  });
+  input.addEventListener("change", e => pickFile(e.target.files[0]));
+  ["dragenter","dragover"].forEach(ev =>
+    drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave","drop"].forEach(ev =>
+    drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", e => {
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) pickFile(f);
+  });
 
-    function pick(file) {
-      if (!file) return;
-      if (file.type && file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-        setStatus('That file does not look like a PDF.', 'err');
-        return;
-      }
-      if (file.size > 4 * 1024 * 1024) {
-        setStatus('File is over 4 MB. Vercel free tier rejects it.', 'err');
-        return;
-      }
-      chosen = file;
-      fname.textContent = file.name;
-      fmeta.textContent = '· ' + fmtBytes(file.size);
-      info.classList.add('show');
+  go.addEventListener("click", async () => {
+    if (!chosen || !pyodide) return;
+    go.disabled = true;
+    setStatusBusy("Parsing PDF\u2026");
+    try {
+      const buf = await chosen.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      // Use pyodide's in-memory filesystem to pass bytes reliably across
+      // Pyodide versions (buffer-protocol bridging has changed between them)
+      pyodide.FS.writeFile("/tmp/in.pdf", bytes);
+      // Yield to the browser so the spinner can paint before parse blocks
+      await new Promise(r => setTimeout(r, 20));
+      pyodide.runPython(`
+with open('/tmp/in.pdf', 'rb') as f:
+    _xlsx = convert_bytes(f.read())
+with open('/tmp/out.xlsx', 'wb') as f:
+    f.write(_xlsx)
+`);
+      const xlsxBytes = pyodide.FS.readFile("/tmp/out.xlsx");
+      const blob = new Blob([xlsxBytes], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      });
+      const outName = chosen.name.replace(/\.pdf$/i, "") + ".xlsx";
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = outName;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      setStatus("Done \u2014 " + outName + " downloaded.", "ok");
+    } catch (e) {
+      console.error(e);
+      setStatus("Conversion failed: " + (e.message || e), "err");
+    } finally {
       go.disabled = false;
-      setStatus('Ready to convert.');
     }
+  });
 
-    drop.addEventListener('click', () => input.click());
-    drop.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); }
-    });
-    input.addEventListener('change', e => pick(e.target.files[0]));
-
-    ['dragenter', 'dragover'].forEach(ev =>
-      drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); })
-    );
-    ['dragleave', 'drop'].forEach(ev =>
-      drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); })
-    );
-    drop.addEventListener('drop', e => {
-      const f = e.dataTransfer.files && e.dataTransfer.files[0];
-      if (f) pick(f);
-    });
-
-    go.addEventListener('click', async () => {
-      if (!chosen) return;
-      go.disabled = true;
-      setStatusBusy('Uploading and parsing…');
-
-      try {
-        const res = await fetch('/api/convert', {
-          method: 'POST',
-          body: chosen,
-          headers: {
-            'Content-Type': 'application/pdf',
-            'X-Filename': chosen.name,
-          },
-        });
-
-        if (!res.ok) {
-          const msg = await res.text();
-          setStatus(msg || ('Server returned ' + res.status), 'err');
-          go.disabled = false;
-          return;
-        }
-
-        const blob = await res.blob();
-        const cd = res.headers.get('Content-Disposition') || '';
-        const m  = /filename="([^"]+)"/.exec(cd);
-        const outName = m ? m[1] : chosen.name.replace(/\.pdf$/i, '') + '.xlsx';
-
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = outName;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-
-        setStatus('Done — ' + outName + ' downloaded.', 'ok');
-        go.disabled = false;
-      } catch (err) {
-        setStatus('Network error: ' + err.message, 'err');
-        go.disabled = false;
-      }
-    });
+  init();
   </script>
 </body>
 </html>
